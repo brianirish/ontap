@@ -1,0 +1,31 @@
+name: Weekly Health Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9am UTC
+  workflow_dispatch:
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose files
+        run: |
+          docker compose -f docker-compose.yml config --quiet
+          docker compose -f docker-compose.yml -f docker-compose.plex.yml config --quiet
+
+      - name: Pull upstream images
+        run: |
+          docker pull rmcrackan/libation:latest
+          docker pull alpine:latest
+
+      - name: Verify Libation CLI exists in image
+        run: docker run --rm rmcrackan/libation:latest which LibationCli
+
+      - name: Verify inotify-tools installs on Alpine
+        run: docker run --rm alpine:latest sh -c 'apk add --no-cache inotify-tools && which inotifywait'
+
+      - name: ShellCheck
+        run: shellcheck scripts/copy-config.sh
