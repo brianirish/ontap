@@ -14,7 +14,7 @@
 [![CI](https://github.com/brianirish/ontap/actions/workflows/ci.yml/badge.svg)](https://github.com/brianirish/ontap/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/github/license/brianirish/ontap)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-rmcrackan%2Flibation-blue?logo=docker)](https://hub.docker.com/r/rmcrackan/libation)
-[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20NAS%20%7C%20Pi-lightgrey)]()
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20Windows-lightgrey)]()
 
 </div>
 
@@ -139,38 +139,6 @@ This adds a lightweight sidecar container that watches your books directory for 
 ---
 
 <details>
-<summary><strong>Platform Notes</strong></summary>
-
-<br>
-
-This works anywhere Docker runs. A few platform-specific tips:
-
-**Synology DSM**
-- Use Container Manager (or docker CLI via SSH)
-- Set `BOOKS_PATH` to a shared folder path like `/volume1/media/audiobooks`
-- Ensure the container user has write permissions to the destination folder
-
-**UGREEN NAS**
-- Works out of the box via SSH or Portainer
-- Same shared folder path approach as Synology
-
-**Unraid**
-- Works via Docker tab or Compose Manager plugin
-- Set `BOOKS_PATH` to your media share (e.g., `/mnt/user/media/audiobooks`)
-
-**TrueNAS SCALE**
-- Deploy via Apps or custom Docker Compose
-- Use a dataset path for `BOOKS_PATH`
-
-**Raspberry Pi**
-- Works on Pi 4+ with Docker installed
-- The Libation image supports ARM64
-
-</details>
-
----
-
-<details>
 <summary><strong>Troubleshooting</strong></summary>
 
 <br>
@@ -195,9 +163,9 @@ This works anywhere Docker runs. A few platform-specific tips:
 - Check the sidecar logs: `docker logs ontap-plex-notify`
 - Make sure `PLEX_LIBRARY_ID` matches your audiobook library
 
-**Permission issues on NAS**
+**Permission issues**
 - The container runs as root by default
-- If your NAS uses specific user/group IDs, you may need to `chown` the config and books directories
+- If downloads fail due to permissions, `chown` the config and books directories to match your user
 
 </details>
 
