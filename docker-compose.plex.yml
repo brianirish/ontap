@@ -1,0 +1,24 @@
+services:
+  plex-notify:
+    image: alpine:latest
+    container_name: ontap-plex-notify
+    restart: unless-stopped
+    depends_on:
+      - ontap
+    environment:
+      - PLEX_URL=${PLEX_URL}
+      - PLEX_TOKEN=${PLEX_TOKEN}
+      - PLEX_LIBRARY_ID=${PLEX_LIBRARY_ID:-1}
+    volumes:
+      - ${BOOKS_PATH:-./books}:/data:ro
+    entrypoint: /bin/sh
+    command: >
+      -c 'apk add --no-cache curl inotify-tools 2>/dev/null;
+      echo "[$(date)] Watching for new audiobooks...";
+      while true; do
+        inotifywait -r -e create -e moved_to /data --timeout 21600 2>/dev/null;
+        echo "[$(date)] New files detected, triggering Plex scan...";
+        curl -s -X POST "$$PLEX_URL/library/sections/$$PLEX_LIBRARY_ID/refresh?X-Plex-Token=$$PLEX_TOKEN";
+        echo "[$(date)] Plex scan triggered";
+        sleep 30;
+      done'

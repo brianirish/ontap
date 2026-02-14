@@ -1,0 +1,10 @@
+services:
+  ontap:
+    image: rmcrackan/libation:latest
+    container_name: ontap
+    restart: unless-stopped
+    environment:
+      - SLEEP_TIME=${SLEEP_TIME:-6h}
+    volumes:
+      - ${CONFIG_PATH:-./config}:/config
+      - ${BOOKS_PATH:-./books}:/data
