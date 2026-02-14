@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Validate docker-compose.plex.yml (overlay)
+        run: docker compose -f docker-compose.yml -f docker-compose.plex.yml config --quiet
+
+      - name: ShellCheck
+        run: shellcheck scripts/copy-config.sh
+
+      - name: Bash syntax check
+        run: bash -n scripts/copy-config.sh
+
+      - name: Check markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
