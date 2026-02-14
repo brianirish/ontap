@@ -75,14 +75,14 @@ docker compose up -d
 docker logs ontap
 ```
 
-You should see Libation scanning your library and downloading any new books. After the initial run, it will check again every 6 hours (configurable).
+You should see Libation scanning your library and downloading any new books. After the initial run, it will check again every hour (configurable).
 
 ## How It Works
 
 ```
 ┌─────────┐     ┌──────────┐     ┌────────────┐     ┌─────────┐
 │  Start  │────▶│   Scan   │────▶│  Download  │────▶│  Sleep  │──╮
-└─────────┘     │  Audible │     │ new books  │     │  (6h)   │  │
+└─────────┘     │  Audible │     │ new books  │     │  (1h)   │  │
                 └──────────┘     └────────────┘     └─────────┘  │
                      ▲                                           │
                      └───────────────────────────────────────────╯
@@ -95,7 +95,7 @@ You should see Libation scanning your library and downloading any new books. Aft
 
 | Variable          | Default       | Description                                    |
 |-------------------|---------------|------------------------------------------------|
-| `SLEEP_TIME`      | `6h`          | How often to check for new books               |
+| `SLEEP_TIME`      | `1h`          | How often to check for new books               |
 | `CONFIG_PATH`     | `./config`    | Path to Libation config (AccountsSettings.json)|
 | `BOOKS_PATH`      | `./books`     | Where audiobooks are downloaded                 |
 | `PLEX_URL`        | —             | Plex server URL (for Plex integration)         |

@@ -4,7 +4,7 @@ services:
     container_name: ontap
     restart: unless-stopped
     environment:
-      - SLEEP_TIME=${SLEEP_TIME:-6h}
+      - SLEEP_TIME=${SLEEP_TIME:-1h}
     volumes:
       - ${CONFIG_PATH:-./config}:/config
       - ${BOOKS_PATH:-./books}:/data

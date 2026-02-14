@@ -22,7 +22,7 @@ jobs:
           docker pull alpine:latest
 
       - name: Verify Libation CLI exists in image
-        run: docker run --rm rmcrackan/libation:latest which LibationCli
+        run: docker run --rm --entrypoint="" rmcrackan/libation:latest test -f /libation/LibationCli
 
       - name: Verify inotify-tools installs on Alpine
         run: docker run --rm alpine:latest sh -c 'apk add --no-cache inotify-tools && which inotifywait'
