@@ -1,15 +1,33 @@
-# OnTap
+<div align="center">
 
-Your audiobooks, always on tap. Automated Audible downloads via [Libation](https://github.com/rmcrackan/Libation) + Docker.
+```
+ ██████╗ ███╗   ██╗████████╗ █████╗ ██████╗
+██╔═══██╗████╗  ██║╚══██╔══╝██╔══██╗██╔══██╗
+██║   ██║██╔██╗ ██║   ██║   ███████║██████╔╝
+██║   ██║██║╚██╗██║   ██║   ██╔══██║██╔═══╝
+╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║
+ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝
+```
+
+*Your audiobooks, always on tap.*
+
+[![CI](https://github.com/brianirish/ontap/actions/workflows/ci.yml/badge.svg)](https://github.com/brianirish/ontap/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/brianirish/ontap)](LICENSE)
+[![Docker](https://img.shields.io/badge/docker-rmcrackan%2Flibation-blue?logo=docker)](https://hub.docker.com/r/rmcrackan/libation)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20NAS%20%7C%20Pi-lightgrey)]()
+
+</div>
+
+---
 
 ## What is this?
 
-OnTap is a turnkey Docker setup that automatically checks your Audible library and downloads new audiobooks on a schedule. It uses the [Libation](https://github.com/rmcrackan/Libation) CLI under the hood, with optional Plex integration to trigger a library scan when new books arrive. Set it up once, forget about it.
+**OnTap is a turnkey Docker setup that automatically checks your Audible library and downloads new audiobooks on a schedule.** It uses the [Libation](https://github.com/rmcrackan/Libation) CLI under the hood, with optional Plex integration to trigger a library scan when new books arrive. Set it up once, forget about it.
 
 ## Prerequisites
 
 - **Docker** and **Docker Compose** installed
-- **Libation** installed locally (just for the initial account setup - you won't need it after)
+- **Libation** installed locally (just for the initial account setup — you won't need it after)
 - An **Audible account** linked in Libation
 
 ## Quick Start
@@ -61,13 +79,17 @@ You should see Libation scanning your library and downloading any new books. Aft
 
 ## How It Works
 
-1. Container starts and copies your auth config internally
-2. Libation scans your Audible library for new titles
-3. New books are downloaded to your configured `BOOKS_PATH`
-4. Container sleeps for the configured interval (default: 6 hours)
-5. Repeat from step 2
+```
+┌─────────┐     ┌──────────┐     ┌────────────┐     ┌─────────┐
+│  Start   │────▶│   Scan   │────▶│  Download  │────▶│  Sleep  │──╮
+└─────────┘     │  Audible │     │ new books  │     │  (6h)   │  │
+                └──────────┘     └────────────┘     └─────────┘  │
+                     ▲                                            │
+                     └────────────────────────────────────────────╯
+```
 
-**Token self-healing:** Audible auth tokens expire periodically. Libation's underlying AudibleApi library handles token refresh automatically - no manual intervention needed. The refreshed tokens are persisted inside the container's internal config, so they survive restarts.
+> [!TIP]
+> **Token self-healing:** Audible auth tokens expire periodically. Libation's underlying AudibleApi library handles token refresh automatically — no manual intervention needed. The container is fully self-healing.
 
 ## Configuration
 
@@ -76,9 +98,11 @@ You should see Libation scanning your library and downloading any new books. Aft
 | `SLEEP_TIME`      | `6h`          | How often to check for new books               |
 | `CONFIG_PATH`     | `./config`    | Path to Libation config (AccountsSettings.json)|
 | `BOOKS_PATH`      | `./books`     | Where audiobooks are downloaded                 |
-| `PLEX_URL`        | -             | Plex server URL (for Plex integration)         |
-| `PLEX_TOKEN`      | -             | Plex API token (for Plex integration)          |
+| `PLEX_URL`        | —             | Plex server URL (for Plex integration)         |
+| `PLEX_TOKEN`      | —             | Plex API token (for Plex integration)          |
 | `PLEX_LIBRARY_ID` | `1`           | Plex library section ID for audiobooks         |
+
+---
 
 ## Plex Integration
 
@@ -112,7 +136,12 @@ docker compose -f docker-compose.yml -f docker-compose.plex.yml up -d
 
 This adds a lightweight sidecar container that watches your books directory for new files and triggers a Plex library scan when changes are detected.
 
-## Platform Notes
+---
+
+<details>
+<summary><strong>Platform Notes</strong></summary>
+
+<br>
 
 This works anywhere Docker runs. A few platform-specific tips:
 
@@ -137,7 +166,14 @@ This works anywhere Docker runs. A few platform-specific tips:
 - Works on Pi 4+ with Docker installed
 - The Libation image supports ARM64
 
-## Troubleshooting
+</details>
+
+---
+
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+
+<br>
 
 **Container exits immediately**
 - Check `docker logs ontap` for errors
@@ -163,7 +199,11 @@ This works anywhere Docker runs. A few platform-specific tips:
 - The container runs as root by default
 - If your NAS uses specific user/group IDs, you may need to `chown` the config and books directories
 
+</details>
+
+---
+
 ## Credits
 
-- [Libation](https://github.com/rmcrackan/Libation) by rmcrackan - the engine that makes this all work
-- [Libation Docker image](https://hub.docker.com/r/rmcrackan/libation) - the official CLI Docker image
+Built on [Libation](https://github.com/rmcrackan/Libation) by rmcrackan — the engine that makes this all work.
+[Docker image](https://hub.docker.com/r/rmcrackan/libation) maintained by the Libation project.
