@@ -16,9 +16,9 @@ services:
       -c 'apk add --no-cache curl inotify-tools 2>/dev/null;
       echo "[$(date)] Watching for new audiobooks...";
       while true; do
-        inotifywait -r -e create -e moved_to /data --timeout 21600 2>/dev/null;
-        echo "[$(date)] New files detected, triggering Plex scan...";
-        curl -s -X POST "$$PLEX_URL/library/sections/$$PLEX_LIBRARY_ID/refresh?X-Plex-Token=$$PLEX_TOKEN";
+        inotifywait -r -e close_write -e moved_to /data 2>/dev/null || continue;
+        echo "[$(date)] Download finished, triggering Plex scan (section $$PLEX_LIBRARY_ID)...";
+        curl -s -o /dev/null -X POST "$$PLEX_URL/library/sections/$$PLEX_LIBRARY_ID/refresh?X-Plex-Token=$$PLEX_TOKEN";
         echo "[$(date)] Plex scan triggered";
         sleep 30;
       done'

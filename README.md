@@ -106,7 +106,28 @@ You should see Libation scanning your library and downloading any new books. Aft
 
 ## Plex Integration
 
-To automatically trigger a Plex library scan when new audiobooks are downloaded:
+A downloaded book won't show up in Plex until Plex scans it in. There are two ways to make that automatic — pick one.
+
+### Option A: Plex's built-in scanning (recommended)
+
+No token, no extra container. Use this when Plex runs on the same machine as your books (a local disk it can watch directly).
+
+**1. Point your Plex audiobook library at `BOOKS_PATH`** — the library folder in Plex and the `BOOKS_PATH` in your `.env` must be the same directory.
+
+**2. In Plex, open Settings → Library and enable:**
+
+- **Scan my library automatically** — Plex scans when the folder changes
+- **Run a partial scan when changes are detected** — only rescans what changed (fast)
+- *(optional)* **Scan my library periodically** — a safety-net scan on a timer
+
+That's it. When OnTap drops a new book in the folder, Plex notices and indexes it on its own.
+
+> [!NOTE]
+> Change detection (FSEvents/inotify) only fires when Plex is watching a **local** filesystem. If your books live on a network share (SMB/NFS), Plex usually won't get change events — lean on the periodic scan above, or use Option B.
+
+### Option B: Scan-trigger sidecar
+
+Use this when Plex runs on a **different host** than your books, or your books are on a **network share** where Plex's own watcher won't fire. It runs a tiny sidecar that watches the books directory and POSTs a scan to Plex when a download finishes.
 
 **1. Get your Plex token**
 
@@ -118,7 +139,7 @@ Follow [Plex's guide](https://support.plex.tv/articles/204059436-finding-an-auth
 curl "http://YOUR_PLEX_IP:32400/library/sections?X-Plex-Token=YOUR_TOKEN"
 ```
 
-Look for your audiobook library's `key` attribute.
+Look for your audiobook library's `key` attribute. **Don't assume it's `1`** — it's whatever number Plex assigned, and using the wrong one scans the wrong library.
 
 **3. Update your `.env`**
 
@@ -133,8 +154,6 @@ PLEX_LIBRARY_ID=3
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.plex.yml up -d
 ```
-
-This adds a lightweight sidecar container that watches your books directory for new files and triggers a Plex library scan when changes are detected.
 
 ---
 
@@ -158,10 +177,16 @@ This adds a lightweight sidecar container that watches your books directory for 
 - Look at `docker logs ontap` for specific error messages
 - Ensure you have enough disk space
 
-**Plex not updating**
+**Plex not updating (Option A — built-in scanning)**
+- Confirm your Plex audiobook library points at the same folder as `BOOKS_PATH`
+- Make sure "Scan my library automatically" is enabled in Plex's Library settings
+- On a network share, change detection often won't fire — enable the periodic scan or switch to Option B
+- Force a one-off scan from the Plex web UI: library → ··· → Scan Library Files
+
+**Plex not updating (Option B — sidecar)**
 - Verify your Plex token is correct: `curl "http://YOUR_PLEX_IP:32400/identity?X-Plex-Token=YOUR_TOKEN"`
 - Check the sidecar logs: `docker logs ontap-plex-notify`
-- Make sure `PLEX_LIBRARY_ID` matches your audiobook library
+- Make sure `PLEX_LIBRARY_ID` matches your audiobook library (not necessarily `1`)
 
 **Permission issues**
 - The container runs as root by default
