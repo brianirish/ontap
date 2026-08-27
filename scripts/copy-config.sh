@@ -89,6 +89,12 @@ else
     echo "  -> Settings.json not found (optional, skipping)"
 fi
 
+# AccountsSettings.json holds Audible auth tokens — owner-only access.
+chmod 600 "$CONFIG_DIR/AccountsSettings.json"
+if [[ -f "$CONFIG_DIR/Settings.json" ]]; then
+    chmod 600 "$CONFIG_DIR/Settings.json"
+fi
+
 # Validate the copy
 if [[ -f "$CONFIG_DIR/AccountsSettings.json" ]] && [[ -s "$CONFIG_DIR/AccountsSettings.json" ]]; then
     echo ""
