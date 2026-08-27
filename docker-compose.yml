@@ -1,5 +1,7 @@
 services:
   ontap:
+    # :latest is deliberate — OnTap is a turnkey wrapper and should pick up
+    # upstream Libation fixes on pull/restart rather than pin and go stale.
     image: rmcrackan/libation:latest
     container_name: ontap
     restart: unless-stopped

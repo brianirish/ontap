@@ -1,6 +1,7 @@
 services:
   plex-notify:
-    image: alpine:latest
+    # Pinned (unlike the libation image) so the sidecar's runtime can't drift.
+    image: alpine:3.23
     container_name: ontap-plex-notify
     restart: unless-stopped
     depends_on:
@@ -12,13 +13,22 @@ services:
     volumes:
       - ${BOOKS_PATH:-./books}:/data:ro
     entrypoint: /bin/sh
+    # The token goes in a header, not the URL: query strings show up in `ps`
+    # output and in any proxy/server logs along the way.
+    # If the tool install fails (e.g. no network yet at boot), exit and let the
+    # restart policy retry with backoff instead of spinning a hot loop.
     command: >
-      -c 'apk add --no-cache curl inotify-tools 2>/dev/null;
+      -c 'apk add --no-cache curl inotify-tools;
+      if ! command -v inotifywait >/dev/null || ! command -v curl >/dev/null; then
+        echo "[$(date)] Tool install failed (no network?); exiting so Docker retries" >&2;
+        sleep 10;
+        exit 1;
+      fi;
       echo "[$(date)] Watching for new audiobooks...";
       while true; do
-        inotifywait -r -e close_write -e moved_to /data 2>/dev/null || continue;
+        inotifywait -r -e close_write -e moved_to /data 2>/dev/null || { sleep 10; continue; };
         echo "[$(date)] Download finished, triggering Plex scan (section $$PLEX_LIBRARY_ID)...";
-        curl -s -o /dev/null -X POST "$$PLEX_URL/library/sections/$$PLEX_LIBRARY_ID/refresh?X-Plex-Token=$$PLEX_TOKEN";
+        curl -s -o /dev/null -X POST -H "X-Plex-Token: $$PLEX_TOKEN" "$$PLEX_URL/library/sections/$$PLEX_LIBRARY_ID/refresh";
         echo "[$(date)] Plex scan triggered";
         sleep 30;
       done'
