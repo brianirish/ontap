@@ -1,5 +1,9 @@
 name: Weekly Health Check
 
+permissions:
+  contents: read
+  actions: write  # the keepalive step re-enables this workflow via the API
+
 on:
   schedule:
     - cron: '0 9 * * 1'  # Monday 9am UTC
@@ -19,13 +23,21 @@ jobs:
       - name: Pull upstream images
         run: |
           docker pull rmcrackan/libation:latest
-          docker pull alpine:latest
+          docker pull alpine:3.23
 
       - name: Verify Libation CLI exists in image
         run: docker run --rm --entrypoint="" rmcrackan/libation:latest test -f /libation/LibationCli
 
       - name: Verify inotify-tools installs on Alpine
-        run: docker run --rm alpine:latest sh -c 'apk add --no-cache inotify-tools && which inotifywait'
+        run: docker run --rm alpine:3.23 sh -c 'apk add --no-cache inotify-tools && which inotifywait'
 
       - name: ShellCheck
         run: shellcheck scripts/copy-config.sh
+
+      - name: Keep this schedule alive
+        # GitHub disables cron workflows after 60 days without repo activity,
+        # which is how this check once died silently. Re-enabling via the API
+        # on every run resets that counter.
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/weekly.yml/enable"
+        env:
+          GH_TOKEN: ${{ github.token }}
